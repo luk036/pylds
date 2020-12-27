@@ -156,10 +156,13 @@ class sphere3_hopf:
         """
         phi = self.vdc0() * twoPI  # map to [0, 2*math.pi]
         psy = self.vdc1() * twoPI  # map to [0, 2*math.pi]
-        zzz = self.vdc2() * 2 - 1  # map to [-1., 1.]
-        eta = math.acos(zzz) / 2
-        cos_eta = math.cos(eta)
-        sin_eta = math.sin(eta)
+        # zzz = self.vdc2() * 2 - 1  # map to [-1., 1.]
+        # eta = math.acos(zzz) / 2
+        # cos_eta = math.cos(eta)
+        # sin_eta = math.sin(eta)
+        vd = self.vdc2()
+        cos_eta = math.sqrt(vd)
+        sin_eta = math.sqrt(1 - vd)
         return [
             cos_eta * math.cos(psy),
             cos_eta * math.sin(psy),

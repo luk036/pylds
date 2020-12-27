@@ -9,13 +9,13 @@ from .low_discr_seq import circle, sphere, vdcorput
 Arr = Union[np.ndarray]
 
 
-class Sp3:
+class Sp3Table:
     def __init__(self):
         self.x = x = np.linspace(0, math.pi, 300)  # NOQA
         self.t = ne.evaluate("(x - sin(x) * cos(x)) / 2")
 
 
-sp3 = Sp3()
+sp3 = Sp3Table()
 halfPI = 0.5 * math.pi
 
 
@@ -34,7 +34,6 @@ class sphere3:
 
     def __init__(self, base: List[int]):
         assert len(base) >= 3
-        self.range_t = 0.5 * math.pi
         self.vdc = vdcorput(base[0])
         self.sphere2 = sphere(base[1:])
 
@@ -44,7 +43,8 @@ class sphere3:
         # xi = interp1(t, x, ti, 'spline')
         cosxi = math.cos(xi)
         sinxi = math.sin(xi)
-        return [cosxi] + [sinxi * xi for xi in self.sphere2()]
+        S = self.sphere2()
+        return [cosxi, sinxi * S[0], sinxi * S[1], sinxi * S[2]]
 
 
 class cylin_n:
@@ -62,8 +62,8 @@ class cylin_n:
     def __init__(self, n: int, base: List[int]):
         assert n >= 1
         assert len(base) >= n
-        self.S = circle(base[1]) if n == 2 else cylin_n(n - 1, base[1:])
         self.vdc = vdcorput(base[0])
+        self.S = circle(base[1]) if n == 2 else cylin_n(n - 1, base[1:])
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -77,22 +77,67 @@ class cylin_n:
         return [cosphi] + [sinphi * xi for xi in self.S()]
 
 
-def int_sin_power(n: int, x):
-    """Evaluate integral sin^n(x) dx
+class IntSinPowerTable:
+    XT = Union[np.ndarray]
 
-    Arguments:
-        n (int): power
-        x (float): [description]
+    def __init__(self):
+        self.x = np.linspace(0.0, math.pi, 300)
+        self.neg_cosine = -np.cos(self.x)
+        self.sine = np.sin(self.x)
+        self.vec_tp_even = [self.x]
+        self.vec_tp_odd = [self.neg_cosine]
 
-    Returns:
-        float: [description]
-    """
-    if n == 0:
-        return x
-    if n == 1:
-        return -np.cos(x)
-    Snm2 = int_sin_power(n - 2, x)  # NOQA
-    return ne.evaluate("((n - 1) * Snm2 - cos(x) * sin(x)**(n - 1)) / n")
+    def get_tp(self, n: int) -> XT:
+        """Evaluate integral sin^n(x) dx"""
+
+        quot, rem = divmod(n, 2)
+        return self.get_tp_even(quot) if rem == 0 else self.get_tp_odd(quot)
+
+    def get_tp_even(self, quot: int) -> XT:
+        if quot < len(self.vec_tp_even):
+            return self.vec_tp_even[quot]
+
+        Snm2 = self.get_tp_even(quot - 1)  # NOQA
+        n = 2 * quot  # NOQA
+        neg_cosine = self.neg_cosine  # NOQA
+        sine = self.sine  # NOQA
+        res = ne.evaluate("((n - 1) * Snm2 + neg_cosine * sine**(n - 1)) / n")
+        self.vec_tp_even += [res]
+        return self.vec_tp_even[quot]
+
+    def get_tp_odd(self, quot: int) -> XT:
+        if quot < len(self.vec_tp_odd):
+            return self.vec_tp_odd[quot]
+
+        Snm2 = self.get_tp_odd(quot - 1)  # NOQA
+        n = 2 * quot + 1  # NOQA
+        neg_cosine = self.neg_cosine  # NOQA
+        sine = self.sine  # NOQA
+        res = ne.evaluate("((n - 1) * Snm2 + neg_cosine * sine**(n - 1)) / n")
+        self.vec_tp_odd += [res]
+        return self.vec_tp_odd[quot]
+
+    # def int_sin_power(self, n: int):
+    #     """Evaluate integral sin^n(x) dx
+
+    #     Arguments:
+    #         n (int): power
+    #         x (float): [description]
+
+    #     Returns:
+    #         float: [description]
+    #     """
+    #     if n == 0:
+    #         return self.x
+    #     if n == 1:
+    #         return self.neg_cosine
+    #     Snm2 = self.int_sin_power(n - 2)  # NOQA
+    #     negcosine = self.neg_cosine  # NOQA
+    #     sine = self.sine  # NOQA
+    #     return ne.evaluate("((n - 1) * Snm2 + neg_cosine * sine**(n - 1)) / n")
+
+
+sp_n = IntSinPowerTable()
 
 
 class sphere_n:
@@ -111,13 +156,11 @@ class sphere_n:
     def __init__(self, n: int, base: List[int]):
         assert n >= 3
         assert len(base) >= n
-
-        m = 300  # number of interpolation points???
-        self.x = np.linspace(0, math.pi, m)
-        self.t = int_sin_power(n - 1, self.x)
-        self.range_t = self.t[-1] - self.t[0]
-        self.S = sphere(base[1:]) if n == 3 else sphere_n(n - 1, base[1:])
         self.vdc = vdcorput(base[0])
+        self.S = sphere(base[1:]) if n == 3 else sphere_n(n - 1, base[1:])
+        self.t = sp_n.get_tp(n - 1)
+        # self.t = sp.int_sin_power(n - 1)
+        self.range_t = self.t[-1] - self.t[0]
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -127,7 +170,7 @@ class sphere_n:
         """
         vd = self.vdc()
         ti = self.t[0] + self.range_t * vd  # map to [t0, tm-1]
-        xi = np.interp(ti, self.t, self.x)
+        xi = np.interp(ti, self.t, sp_n.x)
         cosxi = math.cos(xi)
         sinxi = math.sin(xi)
         return [cosxi] + [sinxi * xi for xi in self.S()]

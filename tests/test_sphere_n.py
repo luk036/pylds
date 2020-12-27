@@ -9,7 +9,7 @@ from pylds.low_discr_seq_n import cylin_n, sphere_n
 
 def rupylds(spgen):
     npoints = 600
-    Triples = np.array([next(spgen) for _ in range(npoints)])
+    Triples = np.array([spgen() for _ in range(npoints)])
     hull = ConvexHull(Triples)
     triangles = hull.simplices
     return discrep_2(triangles, Triples)

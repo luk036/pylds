@@ -4,12 +4,13 @@ import numpy as np
 from scipy.spatial import ConvexHull
 
 from pylds.discrep_2 import discrep_2
-from pylds.low_discr_seq_n import sphere3, sphere3_hopf
+from pylds.low_discr_seq import sphere3_hopf
+from pylds.low_discr_seq_n import sphere3
 
 
 def rupylds(spgen):
     npoints = 600
-    Triples = np.array([next(spgen) for _ in range(npoints)])
+    Triples = np.array([spgen() for _ in range(npoints)])
     hull = ConvexHull(Triples)
     triangles = hull.simplices
     return discrep_2(triangles, Triples)
