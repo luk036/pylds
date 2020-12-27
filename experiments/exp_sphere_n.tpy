@@ -27,8 +27,8 @@ npoints = 4000
 n = 5
 b = prime_table[:n]
 Triples_r = sample_spherical(npoints, n)
-Triples_s = np.array([p for p in sphere_n(npoints, n-1, b)])
-Triples_c = np.array([p for p in cylin_n(npoints, n-1, b)])
+Triples_s = np.array([p for p in sphere_n(npoints, n-1base)])
+Triples_c = np.array([p for p in cylin_n(npoints, n-1base)])
 
 x = list(range(100, npoints, 100))
 res_r = []

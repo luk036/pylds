@@ -7,7 +7,7 @@ def test():
 def rtest():
     b = test()
     for j in range(10):
-        s = [j, next(b)]
+        s = [j, next(base)]
         yield s
 
 if __name__ == "__main__":

@@ -12,7 +12,7 @@ Low discrepancy sequence (with Sn)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1821ee6527371df3a2b8/maintainability)](https://codeclimate.com/github/luk036/pylds/maintainability)
 [![BCH compliance](https://bettercodehub.com/edge/badge/luk036/pylds?branch=master)](https://bettercodehub.com/)
 
-Presentation slides: <https://luk036.github.io/pylds/n_sphere.pdf>
+Presentation slides: <https://luk036.github.io/n_sphere/intro.pdf>
 
 Note
 ----
