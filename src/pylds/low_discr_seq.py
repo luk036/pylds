@@ -16,11 +16,11 @@ def vdc(k: int, base: int = 2) -> float:
     Returns:
         int: [description]
     """
-    vdc = 0.0
-    denom = 1.0
+    vdc: float = 0.0
+    denom: float = 1.0
     while k != 0:
         denom *= base
-        remainder = k % base
+        remainder: int = k % base
         k //= base
         vdc += remainder / denom
     return vdc
@@ -33,8 +33,8 @@ class vdcorput:
         Args:
             base (int, optional): [description]. Defaults to 2.
         """
-        self.base: int = base
-        self.count: int = 0
+        self._base: int = base
+        self._count: int = 0
 
     def __call__(self) -> float:
         """[summary]
@@ -42,19 +42,19 @@ class vdcorput:
         Returns:
             float: [description]
         """
-        self.count += 1
-        return vdc(self.count, self.base)
+        self._count += 1
+        return vdc(self._count, self._base)
 
     def reseed(self, seed: int):
-        self.count = seed
+        self._count = seed
 
 
 class halton:
     """Generate Halton sequence"""
 
     def __init__(self, base: List[int]):
-        self.vdc0 = vdcorput(base[0])
-        self.vdc1 = vdcorput(base[1])
+        self._vdc0 = vdcorput(base[0])
+        self._vdc1 = vdcorput(base[1])
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -62,11 +62,11 @@ class halton:
         Returns:
             list(float):  the next item
         """
-        return [self.vdc0(), self.vdc1()]
+        return [self._vdc0(), self._vdc1()]
 
     def reseed(self, seed: int):
-        self.vdc0.reseed(seed)
-        self.vdc1.reseed(seed)
+        self._vdc0.reseed(seed)
+        self._vdc1.reseed(seed)
 
 
 class circle:
@@ -83,7 +83,7 @@ class circle:
     """
 
     def __init__(self, base: int = 2):
-        self.vdc = vdcorput(base)
+        self._vdc = vdcorput(base)
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -94,11 +94,11 @@ class circle:
         Returns:
             list:  the next item
         """
-        theta = twoPI * self.vdc()  # map to [0, 2*math.pi]
-        return [math.cos(theta), math.sin(theta)]
+        theta = twoPI * self._vdc()  # map to [0, 2*math.pi]
+        return [math.sin(theta), math.cos(theta)]
 
     def reseed(self, seed: int):
-        self.vdc.reseed(seed)
+        self._vdc.reseed(seed)
 
 
 class sphere:
@@ -116,8 +116,8 @@ class sphere:
 
     def __init__(self, base: List[int]):
         assert len(base) >= 2
-        self.vdc = vdcorput(base[0])
-        self.cirgen = circle(base[1])
+        self._vdc = vdcorput(base[0])
+        self._cirgen = circle(base[1])
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -125,14 +125,14 @@ class sphere:
         Returns:
             list:  the next item
         """
-        cosphi = 2 * self.vdc() - 1  # map to [-1, 1]
+        cosphi = 2 * self._vdc() - 1  # map to [-1, 1]
         sinphi = math.sqrt(1 - cosphi * cosphi)
-        cc = self.cirgen()
-        return [cosphi, sinphi * cc[0], sinphi * cc[1]]
+        cc = self._cirgen()
+        return [sinphi * cc[0], sinphi * cc[1], cosphi]
 
     def reseed(self, seed: int):
-        self.cirgen.reseed(seed)
-        self.vdc.reseed(seed)
+        self._cirgen.reseed(seed)
+        self._vdc.reseed(seed)
 
 
 class sphere3_hopf:
@@ -144,9 +144,9 @@ class sphere3_hopf:
 
     def __init__(self, base: List[int]):
         assert len(base) >= 3
-        self.vdc0 = vdcorput(base[0])
-        self.vdc1 = vdcorput(base[1])
-        self.vdc2 = vdcorput(base[2])
+        self._vdc0 = vdcorput(base[0])
+        self._vdc1 = vdcorput(base[1])
+        self._vdc2 = vdcorput(base[2])
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -154,13 +154,13 @@ class sphere3_hopf:
         Returns:
             list:  the next item
         """
-        phi = self.vdc0() * twoPI  # map to [0, 2*math.pi]
-        psy = self.vdc1() * twoPI  # map to [0, 2*math.pi]
-        # zzz = self.vdc2() * 2 - 1  # map to [-1., 1.]
+        phi = self._vdc0() * twoPI  # map to [0, 2*math.pi]
+        psy = self._vdc1() * twoPI  # map to [0, 2*math.pi]
+        # zzz = self._vdc2() * 2 - 1  # map to [-1., 1.]
         # eta = math.acos(zzz) / 2
         # cos_eta = math.cos(eta)
         # sin_eta = math.sin(eta)
-        vd = self.vdc2()
+        vd = self._vdc2()
         cos_eta = math.sqrt(vd)
         sin_eta = math.sqrt(1 - vd)
         return [
@@ -171,9 +171,9 @@ class sphere3_hopf:
         ]
 
     def reseed(self, seed: int):
-        self.vdc0.reseed(seed)
-        self.vdc1.reseed(seed)
-        self.vdc2.reseed(seed)
+        self._vdc0.reseed(seed)
+        self._vdc1.reseed(seed)
+        self._vdc2.reseed(seed)
 
 
 class halton_n:
@@ -188,7 +188,7 @@ class halton_n:
     """
 
     def __init__(self, n: int, base: List[int]):
-        self.vec_vdc = [vdcorput(base[i]) for i in range(n)]
+        self._vec_vdc = [vdcorput(base[i]) for i in range(n)]
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -196,10 +196,10 @@ class halton_n:
         Returns:
             list(float):  the next item
         """
-        return [vdc() for vdc in self.vec_vdc]
+        return [vdc() for vdc in self._vec_vdc]
 
     def reseed(self, seed: int):
-        for vdc in self.vec_vdc:
+        for vdc in self._vec_vdc:
             vdc.reseed(seed)
 
 
