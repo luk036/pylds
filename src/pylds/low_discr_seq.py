@@ -1,7 +1,7 @@
-import math
+from math import cos, pi, sin, sqrt
 from typing import List
 
-twoPI = 2 * math.pi
+twoPI = 2 * pi
 
 
 def vdc(k: int, base: int = 2) -> float:
@@ -95,7 +95,7 @@ class circle:
             list:  the next item
         """
         theta = twoPI * self._vdc()  # map to [0, 2*math.pi]
-        return [math.sin(theta), math.cos(theta)]
+        return [sin(theta), cos(theta)]
 
     def reseed(self, seed: int):
         self._vdc.reseed(seed)
@@ -126,7 +126,7 @@ class sphere:
             list:  the next item
         """
         cosphi = 2 * self._vdc() - 1  # map to [-1, 1]
-        sinphi = math.sqrt(1 - cosphi * cosphi)
+        sinphi = sqrt(1 - cosphi * cosphi)
         cc = self._cirgen()
         return [sinphi * cc[0], sinphi * cc[1], cosphi]
 
@@ -161,13 +161,13 @@ class sphere3_hopf:
         # cos_eta = math.cos(eta)
         # sin_eta = math.sin(eta)
         vd = self._vdc2()
-        cos_eta = math.sqrt(vd)
-        sin_eta = math.sqrt(1 - vd)
+        cos_eta = sqrt(vd)
+        sin_eta = sqrt(1 - vd)
         return [
-            cos_eta * math.cos(psy),
-            cos_eta * math.sin(psy),
-            sin_eta * math.cos(phi + psy),
-            sin_eta * math.sin(phi + psy),
+            cos_eta * cos(psy),
+            cos_eta * sin(psy),
+            sin_eta * cos(phi + psy),
+            sin_eta * sin(phi + psy),
         ]
 
     def reseed(self, seed: int):
@@ -204,6 +204,18 @@ class halton_n:
 
 
 if __name__ == "__main__":
-    halgen = halton_n(4, [2, 5, 7, 3])
+    halgen = halton([2, 3])
     for _ in range(10):
         print(halgen())
+
+    halngen = halton_n(4, [2, 3, 5, 7])
+    for _ in range(10):
+        print(halngen())
+
+    spgen = sphere([2, 3, 5, 7])
+    for _ in range(10):
+        print(spgen())
+
+    sphgen = sphere3_hopf([2, 3, 5, 7])
+    for _ in range(10):
+        print(sphgen())
