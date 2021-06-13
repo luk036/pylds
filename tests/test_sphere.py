@@ -9,7 +9,7 @@ from pylds.low_discr_seq import sphere
 
 def test_sphere():
     npoints = 600
-    sgen = sphere([2, 3, 5])
+    sgen = sphere([2, 3])
     Triples = np.array([sgen() for _ in range(npoints)])
     hull = ConvexHull(Triples)
     triangles = hull.simplices

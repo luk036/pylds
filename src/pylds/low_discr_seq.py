@@ -187,8 +187,8 @@ class halton_n:
         ([float]): base-b low discrepancy sequence
     """
 
-    def __init__(self, n: int, base: List[int]):
-        self._vec_vdc = [vdcorput(base[i]) for i in range(n)]
+    def __init__(self, base: List[int]):
+        self._vec_vdc = [vdcorput(b) for b in base]
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     for _ in range(10):
         print(halgen())
 
-    halngen = halton_n(4, [2, 3, 5, 7])
+    halngen = halton_n([2, 3, 5, 7])
     for _ in range(10):
         print(halngen())
 

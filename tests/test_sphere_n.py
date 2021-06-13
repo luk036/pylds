@@ -16,7 +16,7 @@ def rupylds(spgen):
 
 
 def test_sphere_n():
-    spgen = sphere_n(4, [2, 3, 5, 7])
+    spgen = sphere_n([2, 3, 5, 7])
     measure = rupylds(spgen)
     assert measure == approx(0.9125914)
     # assert measure < 0.913
@@ -24,7 +24,7 @@ def test_sphere_n():
 
 
 def test_cylin_n():
-    cygen = cylin_n(4, [2, 3, 5, 7])
+    cygen = cylin_n([2, 3, 5, 7])
     measure = rupylds(cygen)
     assert measure == approx(1.0505837105828988)
     # assert measure < 1.086

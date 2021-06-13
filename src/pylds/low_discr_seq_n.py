@@ -59,11 +59,11 @@ class cylin_n:
         ([float]): base-b low discrepancy sequence
     """
 
-    def __init__(self, n: int, base: List[int]):
+    def __init__(self, base: List[int]):
+        n = len(base)
         assert n >= 1
-        assert len(base) >= n
         self._vdc = vdcorput(base[0])
-        self._S = circle(base[1]) if n == 2 else cylin_n(n - 1, base[1:])
+        self._S = circle(base[1]) if n == 2 else cylin_n(base[1:])
 
     def __call__(self) -> List[float]:
         """Get the next item
@@ -153,11 +153,11 @@ class sphere_n:
         ([float]): base-b low discrepancy sequence
     """
 
-    def __init__(self, n: int, base: List[int]):
+    def __init__(self, base: List[int]):
+        n = len(base)
         assert n >= 3
-        assert len(base) >= n
         self._vdc = vdcorput(base[0])
-        self._S = sphere(base[1:]) if n == 3 else sphere_n(n - 1, base[1:])
+        self._S = sphere(base[1:]) if n == 3 else sphere_n(base[1:])
         self._t = sp_n.get_tp(n - 1)
         # self._t = sp.int_sin_power(n - 1)
         self._range_t = self._t[-1] - self._t[0]

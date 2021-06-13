@@ -3,16 +3,13 @@ ports:
   onOpen: open-preview
 - port: 8888
   onOpen: open-browser
+tasks:
+  - command: >
+      pip3 install -r ./requirements.txt &&
+      python3 setup.py develop
 image:
   file: .gitpod.Dockerfile
-tasks:
-  - init: >
-      chmod +x envconfig.sh &&
-      ./envconfig.sh
-  - command: >
-      export CMAKE_PREFIX=/opt/conda
 
 vscode:
   extensions:
-    - cschlosser.doxdocgen@0.5.2:SsSNhKMGwp5iVRhI1fnHVA==
-    - ms-vscode.cmake-tools@1.4.2:85XiRZZTNCh6JgvEqefqww==
+    - njpwerner.autodocstring@0.4.0:anSzIFYcUMlw2TxiINxxdQ==
