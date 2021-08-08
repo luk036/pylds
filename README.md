@@ -3,9 +3,8 @@
 Low discrepancy sequence (with Sn)
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/luk036/pylds)
-[![Build Status](https://travis-ci.com/luk036/pylds.svg?branch=main)](https://travis-ci.com/luk036/pylds)
+[![Multi-Platforms](https://github.com/luk036/pylds/actions/workflows/multi-platforms.yml/badge.svg)](https://github.com/luk036/pylds/actions/workflows/multi-platforms.yml)
 ![Python application](https://github.com/luk036/pylds/workflows/Python%20application/badge.svg)
-[![Build status](https://ci.appveyor.com/api/projects/status/od6fhccjsn0wg7dr?svg=true)](https://ci.appveyor.com/project/luk036/pylds)
 [![Documentation Status](https://readthedocs.org/projects/pylds/badge/?version=latest)](https://pylds.readthedocs.io/en/latest/?badge=latest)
 [![codecov](https://codecov.io/gh/luk036/pylds/branch/main/graph/badge.svg?token=G0H3Y8QE8S)](https://codecov.io/gh/luk036/pylds)
 [![CodeFactor](https://www.codefactor.io/repository/github/luk036/pylds/badge)](https://www.codefactor.io/repository/github/luk036/pylds)
