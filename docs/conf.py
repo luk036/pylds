@@ -45,13 +45,15 @@ except FileNotFoundError:
 
 try:
     import sphinx
-    from pkg_resources import parse_version
 
-    cmd_line_template = "sphinx-apidoc -f -o {outputdir} {moduledir}"
+    cmd_line_template = (
+        "sphinx-apidoc --implicit-namespaces -f -o {outputdir} {moduledir}"
+    )
     cmd_line = cmd_line_template.format(outputdir=output_dir, moduledir=module_dir)
 
     args = cmd_line.split(" ")
-    if parse_version(sphinx.__version__) >= parse_version("1.7"):
+    if tuple(sphinx.__version__.split(".")) >= ("1", "7"):
+        # This is a rudimentary parse_version to avoid external dependencies
         args = args[1:]
 
     apidoc.main(args)
@@ -81,8 +83,29 @@ extensions = [
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
+
+# Configure AutoStructify
+# https://recommonmark.readthedocs.io/en/latest/auto_structify.html
+def setup(app):
+    from recommonmark.transform import AutoStructify
+
+    params = {
+        "enable_auto_toc_tree": True,
+        "auto_toc_tree_section": "Contents",
+        "auto_toc_maxdepth": 2,
+        "enable_eval_rst": True,
+        "enable_math": True,
+        "enable_inline_math": True,
+    }
+    app.add_config_value("recommonmark_config", params, True)
+    app.add_transform(AutoStructify)
+
+
+# Enable markdown
+extensions.append("recommonmark")
+
 # The suffix of source filenames.
-source_suffix = ".rst"
+source_suffix = [".rst", ".md"]
 
 # The encoding of source files.
 # source_encoding = 'utf-8-sig'
@@ -92,7 +115,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "pylds"
-copyright = "2020, Wai-Shing Luk"
+copyright = "2021, Wai-Shing Luk"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -115,7 +138,7 @@ release = ""  # Is set by calling `setup.py docs`
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", ".venv"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -277,4 +300,5 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable", None),
     "scipy": ("https://docs.scipy.org/doc/scipy/reference", None),
+    "pyscaffold": ("https://pyscaffold.org/en/stable", None),
 }
