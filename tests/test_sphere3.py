@@ -1,6 +1,5 @@
-from pytest import approx
-
 import numpy as np
+from pytest import approx
 from scipy.spatial import ConvexHull
 
 from pylds.discrep_2 import discrep_2

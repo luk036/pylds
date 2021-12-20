@@ -12,18 +12,13 @@ Low discrepancy sequence (with Sn)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1821ee6527371df3a2b8/maintainability)](https://codeclimate.com/github/luk036/pylds/maintainability)
 [![BCH compliance](https://bettercodehub.com/edge/badge/luk036/pylds?branch=master)](https://bettercodehub.com/)
 
-
-
 Presentation slides: <https://luk036.github.io/n_sphere/intro.pdf>
 
-See also
---------
+## See also
 
--   [low_discr_seq](https://github.com/luk036/low_discr_seq)
+- [low_discr_seq](https://github.com/luk036/low_discr_seq)
 
-
-Note
-----
+## Note
 
 This project has been set up using PyScaffold 3.2.1. For details and usage
 information on PyScaffold see <https://pyscaffold.org/>.
