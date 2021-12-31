@@ -6,7 +6,8 @@ import matplotlib.pylab as lab
 
 from scipy.spatial import ConvexHull
 import numpy as np
-from pylds.sphere3 import sphere3, sphere3_hopf
+from pylds.low_discr_seq_n import sphere3
+from pylds.low_discr_seq import sphere3_hopf
 from pylds.discrep_2 import discrep_2
 
 
@@ -26,8 +27,12 @@ def dispersion(Triples):
 npoints = 4000
 ndim = 4
 Triples_r = sample_spherical(npoints, ndim)
-Triples_h = np.array([p for p in sphere3_hopf(npoints, [2, 3, 5])])
-Triples_s = np.array([p for p in sphere3(npoints, [2, 3, 5])])
+# Triples_h = np.array([p for p in sphere3_hopf(npoints, [2, 3, 5])])
+sh = sphere3_hopf([2, 3, 5])
+Triples_h = np.array([sh() for _ in range(npoints)])
+s3 = sphere3([2, 3, 5])
+# Triples_s = np.array([p for p in sphere3(npoints, [2, 3, 5])])
+Triples_s = np.array([s3() for _ in range(npoints)])
 
 x = list(range(100, npoints, 100))
 res_r = []
