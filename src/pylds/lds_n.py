@@ -1,51 +1,75 @@
-import math
-from typing import List, Union
+from math import cos, sin, sqrt
+from typing import List
 
 import numexpr as ne
 import numpy as np
 
 from .lds import Circle, Sphere, Vdcorput
 
-TWO_PI = 2.0 * math.pi
+PI: float = np.pi
+HALF_PI: float = PI / 2.0
 
 
 class HaltonN:
     vdcs: List[Vdcorput]
 
     def __init__(self, base: List[int]):
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
         self.vdcs = [Vdcorput(b) for b in base]
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         return [vdc.pop() for vdc in self.vdcs]
 
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         for vdc in self.vdcs:
             vdc.reseed(seed)
 
 
-CylinVariant = Union[Circle, CylinN]
+# CylinVariant = Union[Circle, CylinN]
 
 
 class CylinN:
     vdc: Vdcorput
-    c_gen: CylinVariant
 
     def __init__(self, base: List[int]):
-        n = len(base)
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
+        n = base.len()
         assert n >= 2
+        self.vdc = Vdcorput(base[0])
         self.c_gen = Circle(base[1]) if n == 2 else CylinN(base[1:])
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         cosphi = 2.0 * self.vdc.pop() - 1.0  # map to [-1, 1]
-        sinphi = math.sqrt(1.0 - cosphi * cosphi)
-        return [sinphi * xi for xi in self.c_gen()] + [cosphi]
+        sinphi = sqrt(1.0 - cosphi * cosphi)
+        return [xi * sinphi for xi in self.c_gen] + [cosphi]
 
 
-HALF_PI: float = math.pi / 2.0
-
-X: np.ndarray = np.linspace(0.0, math.pi, 300)
+X: np.ndarray = np.linspace(0.0, PI, 300)
 NEG_COSINE: np.ndarray = -np.cos(X)
-SINE: np.ndarray = -np.sin(X)
+SINE: np.ndarray = np.sin(X)
 
 
 class Sphere3:
@@ -54,54 +78,93 @@ class Sphere3:
     tp: np.ndarray
 
     def __init__(self, base: List[int]):
-        self.vdc: Vdcorput(base[0])
-        self.sphere2: Sphere(base[1:])
-        self.tp: ne.evalute("0.5 * (X - SINE + NEG_COSINE)")
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
+        self.vdc = (Vdcorput(base[0]),)
+        self.sphere2 = Sphere(base[1:3])
+        self.tp = ne.evaluate("0.5 * (X - SINE + NEG_COSINE)")
 
     def get_tp(self) -> np.ndarray:
+        """_summary_
+
+        Returns:
+            np.ndarray: _description_
+        """
         return self.tp
 
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.vdc.reseed(seed)
         self.sphere2.reseed(seed)
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         ti = HALF_PI * self.vdc.pop()  # map to [0, pi/2]
         xi = np.interp(ti, self.tp, X)
-        cosxi = math.cos(xi)
-        sinxi = math.sin(xi)
-        [s0, s1, s2] = self.sphere2.pop()
-        return [sinxi * s0, sinxi * s1, sinxi * s2, cosxi]
+        cosxi = cos(xi)
+        sinxi = sin(xi)
+        return [sinxi * s for s in self.sphere2.pop()] + [cosxi]
 
 
-SphereVariant = Union[Sphere3, SphereN]
+# SphereVaiant = Union[Sphere3, SphereN]
 
 
 class SphereN:
     vdc: Vdcorput
-    s_gen: SphereVariant
     tp: np.ndarray
 
     def __init__(self, base: List[int]):
-        n = len(base)
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
+        n = base.len()
         assert n >= 4
-        self.s_gen = Sphere3(base[1:]) if n == 4 else SphereN(base[1:])
-        tp_minus2 = NEG_COSINE if n == 4 else self.s_gen.get_tp_minus1()  # NOQA
+        self.vdc = Vdcorput(base[0])
+        s_gen = Sphere3(base[1:]) if n == 4 else SphereN(base[1:])
+        tp_minus2 = NEG_COSINE if n == 4 else s_gen.get_tp_minus1()  # NOQA
         self.tp = ne.evaluate("((n - 1) * tp_minus2 + NEG_COSINE * SINE**(n - 1)) / n")
+        self.s_gen = s_gen
 
     def get_tp(self) -> np.ndarray:
+        """_summary_
+
+        Returns:
+            np.ndarray: _description_
+        """
         return self.tp
 
     def get_tp_minus1(self) -> np.ndarray:
+        """_summary_
+
+        Returns:
+            np.ndarray: _description_
+        """
         return self.s_gen.get_tp()
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         vd = self.vdc.pop()
-        ti = self.tp[0] + self.tp[len(self.tp) - 1] * vd  # map to [t0, tm-1]
+        ti = self.tp[0] + self.tp[self.tp.len() - 1] * vd  # map to [t0, tm-1]
         xi = np.interp(ti, self.tp, X)
-        sinxi = math.sin(xi)
-        cosxi = math.cos(xi)
-        return [sinxi * xi for xi in self.s_gen.pop()] + [cosxi]
+        sinphi = sin(xi)
+        return [xi * sinphi for xi in self.s_gen.pop()] + [cos(xi)]
 
 
 # First 1000 prime numbers

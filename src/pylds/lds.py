@@ -5,6 +5,15 @@ TWO_PI = 2.0 * pi
 
 
 def vdc(k: int, base: int) -> float:
+    """_summary_
+
+    Args:
+        k (int): _description_
+        base (int): _description_
+
+    Returns:
+        float: _description_
+    """
     vdc = 0.0
     denom = 1.0
     while k != 0:
@@ -20,15 +29,30 @@ class Vdcorput:
     base: int
 
     def __init__(self, base: int = 2):
+        """_summary_
+
+        Args:
+            base (int, optional): _description_. Defaults to 2.
+        """
         self.count = 0.0
         self.base = base
 
     def pop(self) -> float:
+        """_summary_
+
+        Returns:
+            float: _description_
+        """
         self.count += 1
         return vdc(self.count, self.base)
 
     # [allow(dead_code)]
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.count = seed
 
 
@@ -37,14 +61,29 @@ class Halton:
     vdc1: Vdcorput
 
     def __init__(self, base: List[int]):
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
         self.vdc0 = Vdcorput(base[0])
         self.vdc1 = Vdcorput(base[1])
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         return [self.vdc0.pop(), self.vdc1.pop()]
 
     # [allow(dead_code)]
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.vdc0.reseed(seed)
         self.vdc1.reseed(seed)
 
@@ -53,14 +92,29 @@ class Circle:
     vdc: Vdcorput
 
     def __init__(self, base: int):
+        """_summary_
+
+        Args:
+            base (int): _description_
+        """
         self.vdc = Vdcorput(base)
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         theta = self.vdc.pop() * TWO_PI  # map to [0, 2*pi]
         return [sin(theta), cos(theta)]
 
     # [allow(dead_code)]
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.vdc.reseed(seed)
 
 
@@ -69,10 +123,20 @@ class Sphere:
     cirgen: Circle
 
     def __init__(self, base: List[int]):
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
         self.vdc = Vdcorput(base[0])
         self.cirgen = Circle(base[1])
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         cosphi = 2.0 * self.vdc.pop() - 1.0  # map to [-1, 1]
         sinphi = sqrt(1.0 - cosphi * cosphi)
         [c, s] = self.cirgen.pop()
@@ -80,6 +144,11 @@ class Sphere:
 
     # [allow(dead_code)]
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.cirgen.reseed(seed)
         self.vdc.reseed(seed)
 
@@ -91,11 +160,21 @@ class Sphere3Hopf:
     vdc2: Vdcorput
 
     def __init__(self, base: List[int]):
+        """_summary_
+
+        Args:
+            base (List[int]): _description_
+        """
         self.vdc0 = Vdcorput(base[0])
         self.vdc1 = Vdcorput(base[1])
         self.vdc2 = Vdcorput(base[2])
 
     def pop(self) -> List[float]:
+        """_summary_
+
+        Returns:
+            List[float]: _description_
+        """
         phi = self.vdc0.pop() * TWO_PI  # map to [0, 2*pi]
         psy = self.vdc1.pop() * TWO_PI  # map to [0, 2*pi]
         vd = self.vdc2.pop()
@@ -110,6 +189,11 @@ class Sphere3Hopf:
 
     # [allow(dead_code)]
     def reseed(self, seed: int):
+        """_summary_
+
+        Args:
+            seed (int): _description_
+        """
         self.vdc0.reseed(seed)
         self.vdc1.reseed(seed)
         self.vdc2.reseed(seed)

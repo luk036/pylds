@@ -1,10 +1,12 @@
 import math
-from typing import List
+from typing import List, Union
 
 import numexpr as ne
 import numpy as np
 
 from .low_discr_seq import circle, sphere, vdcorput
+
+Arr = Union[np.ndarray, float]
 
 
 class Sp3Table:
@@ -76,7 +78,7 @@ class cylin_n:
 
 
 class IntSinPowerTable:
-    XT = np.ndarray
+    XT = Union[np.ndarray, float]
 
     def __init__(self):
         self.x = np.linspace(0.0, math.pi, 300)
