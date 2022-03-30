@@ -187,7 +187,6 @@ class Sphere3Hopf:
             sin_eta * cos(phi + psy),
         ]
 
-    # [allow(dead_code)]
     def reseed(self, seed: int):
         """_summary_
 

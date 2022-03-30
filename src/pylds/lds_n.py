@@ -1,5 +1,6 @@
 from math import cos, sin, sqrt
 from typing import List
+from functools import cache
 
 import numexpr as ne
 import numpy as np
@@ -51,7 +52,7 @@ class CylinN:
         Args:
             base (List[int]): _description_
         """
-        n = base.len()
+        n = len(base)
         assert n >= 2
         self.vdc = Vdcorput(base[0])
         self.c_gen = Circle(base[1]) if n == 2 else CylinN(base[1:])
@@ -64,7 +65,7 @@ class CylinN:
         """
         cosphi = 2.0 * self.vdc.pop() - 1.0  # map to [-1, 1]
         sinphi = sqrt(1.0 - cosphi * cosphi)
-        return [xi * sinphi for xi in self.c_gen] + [cosphi]
+        return [xi * sinphi for xi in self.c_gen.pop()] + [cosphi]
 
 
 X: np.ndarray = np.linspace(0.0, PI, 300)
@@ -72,10 +73,22 @@ NEG_COSINE: np.ndarray = -np.cos(X)
 SINE: np.ndarray = np.sin(X)
 
 
+@cache
+def get_tp(n: int) -> np.ndarray:
+    """_summary_
+
+    Returns:
+        np.ndarray: _description_
+    """
+    if n == 3:
+        return ne.evaluate("0.5 * (X - SINE + NEG_COSINE)")
+    tp_minus2 = NEG_COSINE if n == 4 else get_tp(n - 2)  # NOQA
+    return ne.evaluate("((n - 1) * tp_minus2 + NEG_COSINE * SINE**(n - 1)) / n")
+
+
 class Sphere3:
     vdc: Vdcorput
     sphere2: Sphere
-    tp: np.ndarray
 
     def __init__(self, base: List[int]):
         """_summary_
@@ -83,17 +96,8 @@ class Sphere3:
         Args:
             base (List[int]): _description_
         """
-        self.vdc = (Vdcorput(base[0]),)
+        self.vdc = Vdcorput(base[0])
         self.sphere2 = Sphere(base[1:3])
-        self.tp = ne.evaluate("0.5 * (X - SINE + NEG_COSINE)")
-
-    def get_tp(self) -> np.ndarray:
-        """_summary_
-
-        Returns:
-            np.ndarray: _description_
-        """
-        return self.tp
 
     def reseed(self, seed: int):
         """_summary_
@@ -111,7 +115,7 @@ class Sphere3:
             List[float]: _description_
         """
         ti = HALF_PI * self.vdc.pop()  # map to [0, pi/2]
-        xi = np.interp(ti, self.tp, X)
+        xi = np.interp(ti, get_tp(3), X)
         cosxi = cos(xi)
         sinxi = sin(xi)
         return [sinxi * s for s in self.sphere2.pop()] + [cosxi]
@@ -119,10 +123,10 @@ class Sphere3:
 
 # SphereVaiant = Union[Sphere3, SphereN]
 
-
 class SphereN:
     vdc: Vdcorput
     tp: np.ndarray
+    n: int
 
     def __init__(self, base: List[int]):
         """_summary_
@@ -130,29 +134,12 @@ class SphereN:
         Args:
             base (List[int]): _description_
         """
-        n = base.len()
+        n = len(base)
         assert n >= 4
         self.vdc = Vdcorput(base[0])
         s_gen = Sphere3(base[1:]) if n == 4 else SphereN(base[1:])
-        tp_minus2 = NEG_COSINE if n == 4 else s_gen.get_tp_minus1()  # NOQA
-        self.tp = ne.evaluate("((n - 1) * tp_minus2 + NEG_COSINE * SINE**(n - 1)) / n")
         self.s_gen = s_gen
-
-    def get_tp(self) -> np.ndarray:
-        """_summary_
-
-        Returns:
-            np.ndarray: _description_
-        """
-        return self.tp
-
-    def get_tp_minus1(self) -> np.ndarray:
-        """_summary_
-
-        Returns:
-            np.ndarray: _description_
-        """
-        return self.s_gen.get_tp()
+        self.n = n
 
     def pop(self) -> List[float]:
         """_summary_
@@ -161,8 +148,9 @@ class SphereN:
             List[float]: _description_
         """
         vd = self.vdc.pop()
-        ti = self.tp[0] + self.tp[self.tp.len() - 1] * vd  # map to [t0, tm-1]
-        xi = np.interp(ti, self.tp, X)
+        tp = get_tp(self.n)
+        ti = tp[0] + tp[len(tp) - 1] * vd  # map to [t0, tm-1]
+        xi = np.interp(ti, tp, X)
         sinphi = sin(xi)
         return [xi * sinphi for xi in self.s_gen.pop()] + [cos(xi)]
 
