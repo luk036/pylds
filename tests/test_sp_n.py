@@ -14,7 +14,7 @@ def rupylds(spgen):
     return discrep_2(triangles, Triples)
 
 
-def notest_sphere_n():
+def test_sphere_n():
     spgen = SphereN([2, 3, 5, 7])
     measure = rupylds(spgen)
     assert measure == approx(0.9125914)
