@@ -34,7 +34,7 @@ class Vdcorput:
         Args:
             base (int, optional): _description_. Defaults to 2.
         """
-        self.count = 0.0
+        self.count = 0
         self.base = base
 
     def pop(self) -> float:
